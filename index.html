@@ -6,10 +6,22 @@
     <title>Chat App</title>
 </head>
 <body>
-    <textarea id="chatLog" readonly></textarea>
-    <input type="text" id="messageInput">
-    <button onclick="sendMessage()">Send</button>
+    <!-- Chat Log Container -->
+    <h2>Simple Chat Demo (uWebSockets.js)</h2>
+    <div style="display: flex; justify-content: center; align-items: top; height: 100vh; font-family: Arial, sans-serif;">
+        <div style="flex: 1; padding: 20px;">
+            <label for="chatLog" style="display: block; margin-bottom: 10px;">
+                Chat Log
+            </label>
+            <textarea id="chatLog" readonly style="width: 100%; height: 300px; resize: none;"></textarea>
+        </div>
 
+        <!-- Message Input Container -->
+        <div style="flex: 1; padding: 20px;">
+            <input type="text" id="messageInput" placeholder="type message here..." style="width: 100%; box-sizing: border-box;">
+            <button onclick="sendMessage()" style="margin-top: 10px;">Send</button>
+        </div>
+    </div>
     <script>
         const ws = new WebSocket('ws://localhost:3000');
 

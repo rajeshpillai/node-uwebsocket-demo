@@ -4,17 +4,16 @@ const uWS = require('uWebSockets.js');
 const app = uWS.App();
 
 const PORT = 3000;
-
 const activeSockets = [];
 
-
+// Default route for http
 app.get('/*', (res, req) => {
   const fileBuffer = fs.readFileSync(__dirname + '/index.html');
   res.writeHeader('Content-Type', 'text/html');
   res.end(fileBuffer);
 });
 
-
+// Default route for socket
 app.ws('/*', {
   /* Options */
   compression: uWS.SHARED_COMPRESSOR,
@@ -49,7 +48,7 @@ app.ws('/*', {
   }
 }).listen(PORT, (token) => {
   if (token) {
-      console.log('Server started on port:', PORT);
+      console.log('Server started on port: (Open multiple browser window to test out the chat feature)', PORT);
   } else {
       console.log('Failed to start server on port:', PORT);
   }
