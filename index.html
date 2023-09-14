@@ -17,10 +17,12 @@
         </div>
 
         <!-- Message Input Container -->
-        <div style="flex: 1; padding: 20px;">
-            <input type="text" id="messageInput" placeholder="type message here..." style="width: 100%; box-sizing: border-box;">
-            <button onclick="sendMessage()" style="margin-top: 10px;">Send</button>
-        </div>
+        <form onsubmit="sendMessage(event)">
+            <div style="flex: 1; padding: 20px;">
+                <input type="text" id="messageInput" placeholder="type message here..." style="width: 100%; box-sizing: border-box;">
+                <button type="submit" style="margin-top: 10px;">Send</button>
+            </div>
+        </form>
     </div>
     <script>
         const ws = new WebSocket('ws://localhost:3000');
@@ -35,7 +37,8 @@
             chatLog.scrollTop = chatLog.scrollHeight; // Auto-scroll to the bottom
         };
 
-        function sendMessage() {
+        function sendMessage(e) {
+            e.preventDefault();
             const messageInput = document.getElementById('messageInput');
             ws.send(messageInput.value);
             messageInput.value = ''; // Clear the input field

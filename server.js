@@ -30,10 +30,10 @@ app.ws('/*', {
     
     // Broadcast the message to all connected clients
     for (let client of activeSockets) {
-      if (client !== ws) { // Optional: exclude the sender
+      //if (client !== ws) { // Optional: exclude the sender
         console.log(`Sending message ${message} to client: `, client);
         client.send(message, isBinary);
-      }
+      //}
     }
   },
   drain: (ws) => {
