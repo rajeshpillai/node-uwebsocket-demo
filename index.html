@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+</head>
+<body>
+    <textarea id="chatLog" readonly></textarea>
+    <input type="text" id="messageInput">
+    <button onclick="sendMessage()">Send</button>
+
+    <script>
+        const ws = new WebSocket('ws://localhost:3000');
+
+        ws.onopen = () => {
+            console.log('Connected to the WebSocket server');
+        };
+
+        ws.onmessage = (event) => {
+            const chatLog = document.getElementById('chatLog');
+            chatLog.value += event.data + '\n';
+            chatLog.scrollTop = chatLog.scrollHeight; // Auto-scroll to the bottom
+        };
+
+        function sendMessage() {
+            const messageInput = document.getElementById('messageInput');
+            ws.send(messageInput.value);
+            messageInput.value = ''; // Clear the input field
+        }
+    </script>
+</body>
+</html>
