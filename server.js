@@ -6,6 +6,34 @@ const app = uWS.App();
 const PORT = 3000;
 const activeSockets = [];
 
+// ROOM CODE -->
+let rooms = {};
+
+function joinRoom(ws, roomName) {
+    if (!rooms[roomName]) {
+        rooms[roomName] = [];
+    }
+    rooms[roomName].push(ws);
+}
+
+function leaveRoom(ws, roomName) {
+    if (rooms[roomName]) {
+        rooms[roomName] = rooms[roomName].filter(client => client !== ws);
+        if (rooms[roomName].length === 0) {
+            delete rooms[roomName];
+        }
+    }
+}
+
+function broadcastToRoom(roomName, message) {
+    if (rooms[roomName]) {
+        for (let client of rooms[roomName]) {
+            client.send(message);
+        }
+    }
+}
+// END ROOM <--
+
 // Default route for http
 app.get('/*', (res, req) => {
   const fileBuffer = fs.readFileSync(__dirname + '/index.html');
@@ -15,41 +43,34 @@ app.get('/*', (res, req) => {
 
 // Default route for socket
 app.ws('/*', {
-  /* Options */
-  compression: uWS.SHARED_COMPRESSOR,
-  maxPayloadLength: 16 * 1024 * 1024,
-  idleTimeout: 10,
-  /* Handlers */
   open: (ws) => {
-    console.log('A user connected.');
-    activeSockets.push(ws);
+      console.log('Client connected');
   },
   message: (ws, message, isBinary) => {
-    let receivedMessage = Buffer.from(message).toString();
-    console.log('Received message:', receivedMessage);
-    
-    // Broadcast the message to all connected clients
-    for (let client of activeSockets) {
-      //if (client !== ws) { // Optional: exclude the sender
-        console.log(`Sending message ${message} to client: `, client);
-        client.send(message, isBinary);
-      //}
-    }
+      const data = JSON.parse(Buffer.from(message).toString());
+
+      if (data.action === 'join') {
+          console.log(`Joining room ${data.room}`)
+          joinRoom(ws, data.room);
+          ws.currentRoom = data.room; // Store the current room in the WebSocket object
+      } else if (data.action === 'leave') {
+          console.log(`Leaving room ${data.room}`)
+          leaveRoom(ws, data.room);
+          delete ws.currentRoom;
+      } else if (data.action === 'message' && ws.currentRoom) {
+          broadcastToRoom(ws.currentRoom, data.content);
+      }
   },
-  drain: (ws) => {
-      console.log('WebSocket backpressure: ' + ws.getBufferedAmount());
-  },
-  close: (ws, code, message) => {
-    console.log('WebSocket closed');
-    const index = activeSockets.indexOf(ws);
-    if (index > -1) {
-        activeSockets.splice(index, 1);
-    }
+  close: (ws) => {
+      if (ws.currentRoom) {
+          leaveRoom(ws, ws.currentRoom);
+      }
+      console.log('Client disconnected');
   }
-}).listen(PORT, (token) => {
+}).listen(3000, (token) => {
   if (token) {
-      console.log('Server started on port: (Open multiple browser window to test out the chat feature)', PORT);
+      console.log('WebSocket server started on port 3000.  Open multiple browser to test the chat feature!');
   } else {
-      console.log('Failed to start server on port:', PORT);
+      console.log('Failed to start WebSocket server');
   }
 });
